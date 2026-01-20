@@ -5,6 +5,9 @@
   collections:
     - f5networks.f5_modules
 
+  vars_files:
+    - ../group_vars/f5.yml
+
   tasks:
     - name: Créer les Virtual Servers sur F5
       bigip_virtual_server:

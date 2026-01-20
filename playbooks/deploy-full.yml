@@ -5,6 +5,9 @@
   collections:
     - f5networks.f5_modules
 
+  vars_files:
+    - ../group_vars/f5.yml
+
   tasks:
     - name: "ÉTAPE 1/4 - Créer les nodes"
       bigip_node:
