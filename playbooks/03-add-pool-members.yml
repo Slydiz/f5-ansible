@@ -14,6 +14,7 @@
         provider: "{{ f5_provider }}"
         pool: "{{ item.pool }}"
         name: "{{ item.name }}"
+        address: "{{ item.address }}"
         port: "{{ item.port }}"
         partition: "{{ partition }}"
         state: present
