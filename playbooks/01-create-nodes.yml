@@ -1,0 +1,25 @@
+---
+- name: Créer les nodes F5
+  hosts: f5
+  gather_facts: no
+  collections:
+    - f5networks.f5_modules
+
+  tasks:
+    - name: Créer les nodes sur F5
+      bigip_node:
+        provider: "{{ f5_provider }}"
+        name: "{{ item.name }}"
+        address: "{{ item.address }}"
+        description: "{{ item.description | default(omit) }}"
+        partition: "{{ partition }}"
+        state: present
+      loop: "{{ f5_nodes }}"
+      delegate_to: localhost
+      register: node_result
+
+    - name: Afficher le résultat
+      debug:
+        msg: "Node {{ item.item.name }} créé avec succès"
+      loop: "{{ node_result.results }}"
+      when: item.changed

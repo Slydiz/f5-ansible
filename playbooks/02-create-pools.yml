@@ -1,0 +1,27 @@
+---
+- name: Créer les pools F5
+  hosts: f5
+  gather_facts: no
+  collections:
+    - f5networks.f5_modules
+
+  tasks:
+    - name: Créer les pools sur F5
+      bigip_pool:
+        provider: "{{ f5_provider }}"
+        name: "{{ item.name }}"
+        lb_method: "{{ item.lb_method }}"
+        description: "{{ item.description | default(omit) }}"
+        monitors: "{{ item.monitors | default(omit) }}"
+        monitor_type: "{{ item.monitor_type | default('and_list') }}"
+        partition: "{{ partition }}"
+        state: present
+      loop: "{{ f5_pools }}"
+      delegate_to: localhost
+      register: pool_result
+
+    - name: Afficher le résultat
+      debug:
+        msg: "Pool {{ item.item.name }} créé avec succès"
+      loop: "{{ pool_result.results }}"
+      when: item.changed

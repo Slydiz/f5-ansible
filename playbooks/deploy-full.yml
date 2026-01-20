@@ -1,0 +1,66 @@
+---
+- name: Déploiement complet F5 - Nodes, Pools et Virtual Servers
+  hosts: f5
+  gather_facts: no
+  collections:
+    - f5networks.f5_modules
+
+  tasks:
+    - name: "ÉTAPE 1/4 - Créer les nodes"
+      bigip_node:
+        provider: "{{ f5_provider }}"
+        name: "{{ item.name }}"
+        address: "{{ item.address }}"
+        description: "{{ item.description | default(omit) }}"
+        partition: "{{ partition }}"
+        state: present
+      loop: "{{ f5_nodes }}"
+      delegate_to: localhost
+
+    - name: "ÉTAPE 2/4 - Créer les pools"
+      bigip_pool:
+        provider: "{{ f5_provider }}"
+        name: "{{ item.name }}"
+        lb_method: "{{ item.lb_method }}"
+        description: "{{ item.description | default(omit) }}"
+        monitors: "{{ item.monitors | default(omit) }}"
+        monitor_type: "{{ item.monitor_type | default('and_list') }}"
+        partition: "{{ partition }}"
+        state: present
+      loop: "{{ f5_pools }}"
+      delegate_to: localhost
+
+    - name: "ÉTAPE 3/4 - Ajouter les membres aux pools"
+      bigip_pool_member:
+        provider: "{{ f5_provider }}"
+        pool: "{{ item.pool }}"
+        name: "{{ item.name }}"
+        port: "{{ item.port }}"
+        partition: "{{ partition }}"
+        state: present
+      loop: "{{ f5_pool_members }}"
+      delegate_to: localhost
+
+    - name: "ÉTAPE 4/4 - Créer les Virtual Servers"
+      bigip_virtual_server:
+        provider: "{{ f5_provider }}"
+        name: "{{ item.name }}"
+        destination: "{{ item.destination }}"
+        port: "{{ item.port }}"
+        pool: "{{ item.pool }}"
+        description: "{{ item.description | default(omit) }}"
+        snat: "{{ item.snat | default('automap') }}"
+        profiles: "{{ item.profiles | default(omit) }}"
+        partition: "{{ partition }}"
+        state: present
+      loop: "{{ f5_virtual_servers }}"
+      delegate_to: localhost
+
+    - name: Résumé du déploiement
+      debug:
+        msg:
+          - "==== DÉPLOIEMENT TERMINÉ ===="
+          - "Nodes créés: {{ f5_nodes | length }}"
+          - "Pools créés: {{ f5_pools | length }}"
+          - "Pool members ajoutés: {{ f5_pool_members | length }}"
+          - "Virtual Servers créés: {{ f5_virtual_servers | length }}"
