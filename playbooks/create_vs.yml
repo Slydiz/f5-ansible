@@ -1,0 +1,24 @@
+---
+- name: Créer un Virtual Server simple
+  hosts: f5
+  gather_facts: no
+  collections:
+    - f5networks.f5_modules
+
+  tasks:
+    - name: "Créer le Virtual Server"
+      bigip_virtual_server:
+        provider:
+          server: "{{ ansible_host }}"
+          user: "{{ ansible_user }}"
+          password: "{{ ansible_password }}"
+          validate_certs: no
+          server_port: 443
+        name: vs-test
+        destination: 10.69.238.220
+        port: 80
+        description: "Virtual Server simple sans pool"
+        snat: automap
+        partition: Common
+        state: present
+      delegate_to: localhost
