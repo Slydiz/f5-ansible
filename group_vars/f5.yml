@@ -11,11 +11,9 @@ f5_nodes:
   - name: web-server-01
     address: 10.69.238.202
     description: "Serveur Web Debian 1"
-    monitors: /Common/http
   - name: web-server-02
     address: 10.69.238.203
     description: "Serveur Web Debian 2"
-    monitors: /Common/https_443
 
 
 f5_pools:
