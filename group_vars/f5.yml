@@ -1,5 +1,3 @@
----
-# Variables globales F5
 f5_provider:
   server: "{{ ansible_host }}"
   user: "{{ ansible_user }}"
@@ -7,10 +5,8 @@ f5_provider:
   validate_certs: no
   server_port: 443
 
-# Partition à utiliser
 partition: "{{ f5_partition | default('Common') }}"
 
-# Définition des nodes (vos 2 serveurs Debian)
 f5_nodes:
   - name: web-server-01
     address: 10.69.238.202
@@ -20,7 +16,6 @@ f5_nodes:
     description: "Serveur Web Debian 2"
 
 
-# Définition des pools
 f5_pools:
   - name: pool-web-http
     lb_method: round-robin
@@ -29,7 +24,7 @@ f5_pools:
       - /Common/http
     monitor_type: and_list
 
-# Membres du pool (association nodes -> pool)
+
 f5_pool_members:
   - pool: pool-web-http
     name: web-server-01
@@ -41,7 +36,6 @@ f5_pool_members:
     port: 80
 
 
-# Définition des Virtual Servers
 f5_virtual_servers:
   - name: vs-web-http
     destination: 10.1.10.100
