@@ -5,14 +5,14 @@ f5_provider:
   validate_certs: no
   server_port: 443
 
-partition: "{{ f5_partition | default('Common') }}"
+partition: "{{ f5_partition }}"
 
 f5_nodes:
   - name: web-server-01
     address: 10.69.238.202
     description: "Serveur Web Debian 1"
     monitors:
-      - /Common/http
+      - /Common/https_443
   - name: web-server-02
     address: 10.69.238.203
     description: "Serveur Web Debian 2"
@@ -23,7 +23,28 @@ f5_nodes:
 f5_pools:
   - name: pool-web-http
     lb_method: round-robin
-    description: "Pool HTTP pour serveurs web"
+    description: "Pool HTTP"
     monitors:
       - /Common/https_443
     monitor_type: and_list
+    members:
+      - node: web-server-01
+        address: 10.69.238.202
+        port: 443
+        description: "Membre Web Server 1"
+      - node: web-server-02
+        address: 10.69.238.203
+        port: 443
+        description: "Membre Web Server 2"
+
+f5_virtual_servers:
+  - name: vs-web-http
+    destination: 10.69.238.210
+    port: 443
+    pool: pool-web-http
+    description: "Virtual Server HTTP"
+    snat: automap
+    profiles:
+      - http
+      - tcp
+
