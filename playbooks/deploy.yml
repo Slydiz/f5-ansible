@@ -13,6 +13,7 @@
       bigip_node:
         provider: "{{ f5_provider }}"
         name: "{{ item.name }}"
+        monitor: "{{ item.monitors }}"
         address: "{{ item.address }}"
         description: "{{ item.description | default(omit) }}"
         partition: "{{ partition }}"
