@@ -13,9 +13,9 @@
       bigip_node:
         provider: "{{ f5_provider }}"
         name: "{{ item.name }}"
-        monitor: "{{ item.monitors }}"
         address: "{{ item.address }}"
         description: "{{ item.description | default(omit) }}"
+        monitors: "{{ item.monitors | default(omit) }}"
         partition: "{{ partition }}"
         state: present
       loop: "{{ f5_nodes }}"
