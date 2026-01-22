@@ -37,14 +37,3 @@ f5_pools:
         port: 443
         description: "Membre Web Server 2"
 
-f5_virtual_servers:
-  - name: vs-web-http
-    destination: 10.69.238.210
-    port: 443
-    pool: pool-web-http
-    description: "Virtual Server HTTP"
-    snat: automap
-    profiles:
-      - http
-      - tcp
-

@@ -1,5 +1,5 @@
 ---
-- name: Déploiement complet F5 - Nodes, Pools, Pool Members et Virtual Servers
+- name: Déploiement F5 - Nodes, Pools et Pool Members
   hosts: f5
   gather_facts: no
   collections:
@@ -9,7 +9,7 @@
     - ../group_vars/f5.yml
 
   tasks:
-    - name: "ÉTAPE 1/4 - Créer les nodes"
+    - name: "ÉTAPE 1/3 - Créer les nodes"
       bigip_node:
         provider: "{{ f5_provider }}"
         name: "{{ item.name }}"
@@ -21,7 +21,7 @@
       loop: "{{ f5_nodes }}"
       delegate_to: localhost
 
-    - name: "ÉTAPE 2/4 - Créer les pools"
+    - name: "ÉTAPE 2/3 - Créer les pools"
       bigip_pool:
         provider: "{{ f5_provider }}"
         name: "{{ item.name }}"
@@ -34,7 +34,7 @@
       loop: "{{ f5_pools }}"
       delegate_to: localhost
 
-    - name: "ÉTAPE 3/4 - Ajouter les pool members"
+    - name: "ÉTAPE 3/3 - Ajouter les pool members"
       bigip_pool_member:
         provider: "{{ f5_provider }}"
         pool: "{{ item.0.name }}"
@@ -45,19 +45,4 @@
         partition: "{{ partition }}"
         state: present
       loop: "{{ f5_pools | subelements('members') }}"
-      delegate_to: localhost
-
-    - name: "ÉTAPE 4/4 - Créer les virtual servers"
-      bigip_virtual_server:
-        provider: "{{ f5_provider }}"
-        name: "{{ item.name }}"
-        destination: "{{ item.destination }}"
-        port: "{{ item.port }}"
-        pool: "{{ item.pool }}"
-        description: "{{ item.description | default(omit) }}"
-        snat: "{{ item.snat | default('automap') }}"
-        profiles: "{{ item.profiles | default(omit) }}"
-        partition: "{{ partition }}"
-        state: present
-      loop: "{{ f5_virtual_servers }}"
       delegate_to: localhost
