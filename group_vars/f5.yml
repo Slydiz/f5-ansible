@@ -21,28 +21,5 @@ f5_pools:
     lb_method: round-robin
     description: "Pool HTTP pour serveurs web"
     monitors:
-      - /Common/http
+      - /Common/https_443
     monitor_type: and_list
-
-
-f5_pool_members:
-  - pool: pool-web-http
-    name: web-server-01
-    address: 192.168.10.11
-    port: 80
-  - pool: pool-web-http
-    name: web-server-02
-    address: 192.168.10.12
-    port: 80
-
-
-f5_virtual_servers:
-  - name: vs-web-http
-    destination: 10.1.10.100
-    port: 80
-    pool: pool-web-http
-    description: "Virtual Server HTTP"
-    snat: automap
-    profiles:
-      - http
-      - tcp
