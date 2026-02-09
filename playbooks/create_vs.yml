@@ -16,7 +16,7 @@
     vs_traffic_group: "/Common/traffic-group-1"  # ou traffic-group-2
 
   tasks:
-    - name: "Créer VS sur {{ vs_traffic_group }}"
+    - name: "Créer VS {{ vs_name }}"
       bigip_virtual_server:
         provider: "{{ f5_provider }}"
         name: "{{ vs_name }}"
@@ -24,7 +24,14 @@
         port: "{{ vs_port }}"
         description: "VS on {{ vs_traffic_group }}"
         snat: automap
-        traffic_group: "{{ vs_traffic_group }}"
         partition: Common
         state: present
       delegate_to: localhost
+
+    - name: "Assigner {{ vs_name }} au Traffic Group {{ vs_traffic_group }}"
+      bigip_command:
+        provider: "{{ f5_provider }}"
+        commands:
+          - "modify ltm virtual /Common/{{ vs_name }} traffic-group {{ vs_traffic_group }}"
+      delegate_to: localhost
+      when: vs_traffic_group is defined

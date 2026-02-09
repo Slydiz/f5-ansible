@@ -15,12 +15,10 @@
 
   tasks:
     - name: "Déplacer le VS '{{ vs_name }}' vers {{ target_traffic_group }}"
-      bigip_virtual_server:
+      bigip_command:
         provider: "{{ f5_provider }}"
-        name: "{{ vs_name }}"
-        traffic_group: "{{ target_traffic_group }}"
-        partition: "{{ partition }}"
-        state: present
+        commands:
+          - "modify ltm virtual /{{ partition }}/{{ vs_name }} traffic-group {{ target_traffic_group }}"
       delegate_to: localhost
 
     - name: "Afficher le résultat"
