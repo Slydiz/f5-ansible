@@ -13,7 +13,7 @@
     vs_name: "vs-test"
     vs_destination: "10.69.238.220"
     vs_port: 80
-    vs_traffic_group: "/Common/traffic-group-1"  # ou traffic-group-2
+    vs_traffic_group: "traffic-group-1"  # ou traffic-group-2 (sans /Common/)
 
   tasks:
     - name: "Créer VS {{ vs_name }}"
@@ -32,6 +32,6 @@
       bigip_command:
         provider: "{{ f5_provider }}"
         commands:
-          - "modify ltm virtual /Common/{{ vs_name }} traffic-group {{ vs_traffic_group }}"
+          - "modify ltm virtual /Common/{{ vs_name }} traffic-group /Common/{{ vs_traffic_group }}"
       delegate_to: localhost
       when: vs_traffic_group is defined
