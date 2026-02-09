@@ -1,0 +1,28 @@
+---
+- name: Déplacer un VS vers un autre Traffic Group
+  hosts: f5
+  gather_facts: no
+  collections:
+    - f5networks.f5_modules
+
+  vars_files:
+    - ../group_vars/f5.yml
+
+  vars:
+    # À personnaliser selon vos besoins
+    vs_name: "vs-test"
+    target_traffic_group: "/Common/traffic-group-2"  # ou traffic-group-1
+
+  tasks:
+    - name: "Déplacer le VS '{{ vs_name }}' vers {{ target_traffic_group }}"
+      bigip_virtual_server:
+        provider: "{{ f5_provider }}"
+        name: "{{ vs_name }}"
+        traffic_group: "{{ target_traffic_group }}"
+        partition: "{{ partition }}"
+        state: present
+      delegate_to: localhost
+
+    - name: "Afficher le résultat"
+      debug:
+        msg: "Le VS '{{ vs_name }}' est maintenant assigné à {{ target_traffic_group }}"

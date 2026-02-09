@@ -1,24 +1,27 @@
 ---
-- name: Créer un Virtual Server simple
+- name: VS
   hosts: f5
   gather_facts: no
   collections:
     - f5networks.f5_modules
 
+  vars:
+    # Personnaliser selon vos besoins
+    vs_name: "vs-test"
+    vs_destination: "10.69.238.220"
+    vs_port: 80
+    vs_traffic_group: "/Common/traffic-group-1"  # ou traffic-group-2
+
   tasks:
-    - name: "Créer le Virtual Server"
+    - name: "Créer VS sur {{ vs_traffic_group }}"
       bigip_virtual_server:
-        provider:
-          server: "{{ ansible_host }}"
-          user: "{{ ansible_user }}"
-          password: "{{ ansible_password }}"
-          validate_certs: no
-          server_port: 443
-        name: vs-test
-        destination: 10.69.238.220
-        port: 80
-        description: "Virtual Server simple sans pool"
+        provider: "{{ f5_provider }}"
+        name: "{{ vs_name }}"
+        destination: "{{ vs_destination }}"
+        port: "{{ vs_port }}"
+        description: "VS on {{ vs_traffic_group }}"
         snat: automap
+        traffic_group: "{{ vs_traffic_group }}"
         partition: Common
         state: present
       delegate_to: localhost

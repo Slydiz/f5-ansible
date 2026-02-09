@@ -9,39 +9,39 @@
     - ../group_vars/f5.yml
 
   tasks:
-    - name: "ÉTAPE 1/3 - Créer les nodes"
+    - name: "ÉTAPE 1/3 - nodes"
       bigip_node:
         provider: "{{ f5_provider }}"
         name: "{{ item.name }}"
         address: "{{ item.address }}"
-        description: "{{ item.description | default(omit) }}"
-        monitors: "{{ item.monitors | default(omit) }}"
+        description: "{{ item.description }}"
+        monitors: "{{ item.monitors }}"
         partition: "{{ partition }}"
         state: present
       loop: "{{ f5_nodes }}"
       delegate_to: localhost
 
-    - name: "ÉTAPE 2/3 - Créer les pools"
+    - name: "ÉTAPE 2/3 - pools"
       bigip_pool:
         provider: "{{ f5_provider }}"
         name: "{{ item.name }}"
         lb_method: "{{ item.lb_method }}"
-        description: "{{ item.description | default(omit) }}"
-        monitors: "{{ item.monitors | default(omit) }}"
-        monitor_type: "{{ item.monitor_type | default('and_list') }}"
+        description: "{{ item.description }}"
+        monitors: "{{ item.monitors }}"
+        monitor_type: "{{ item.monitor_type }}"
         partition: "{{ partition }}"
         state: present
       loop: "{{ f5_pools }}"
       delegate_to: localhost
 
-    - name: "ÉTAPE 3/3 - Ajouter les pool members"
+    - name: "ÉTAPE 3/3 - membre pool"
       bigip_pool_member:
         provider: "{{ f5_provider }}"
         pool: "{{ item.0.name }}"
         name: "{{ item.1.node }}"
         address: "{{ item.1.address }}"
         port: "{{ item.1.port }}"
-        description: "{{ item.1.description | default(omit) }}"
+        description: "{{ item.1.description }}"
         partition: "{{ partition }}"
         state: present
       loop: "{{ f5_pools | subelements('members') }}"

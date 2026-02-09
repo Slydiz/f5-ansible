@@ -1,0 +1,33 @@
+---
+- name: Basculer un Traffic Group vers l'autre F5
+  hosts: f5
+  gather_facts: no
+  collections:
+    - f5networks.f5_modules
+
+  vars_files:
+    - ../group_vars/f5.yml
+
+  vars:
+    # Traffic Group à basculer
+    traffic_group: "traffic-group-1"  # ou traffic-group-2
+
+  tasks:
+    - name: "Vérifier l'état actuel du Traffic Group"
+      bigip_command:
+        provider: "{{ f5_provider }}"
+        commands:
+          - "show sys ha-group"
+      delegate_to: localhost
+      register: ha_status
+
+    - name: "Basculer {{ traffic_group }} vers standby (active sur l'autre F5)"
+      bigip_command:
+        provider: "{{ f5_provider }}"
+        commands:
+          - "run sys failover standby traffic-group {{ traffic_group }}"
+      delegate_to: localhost
+
+    - name: "Afficher le résultat"
+      debug:
+        msg: "Le Traffic Group '{{ traffic_group }}' a été basculé vers l'autre F5"
