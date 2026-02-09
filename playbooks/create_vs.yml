@@ -5,6 +5,9 @@
   collections:
     - f5networks.f5_modules
 
+  vars_files:
+    - ../group_vars/f5.yml
+
   vars:
     # Personnaliser selon vos besoins
     vs_name: "vs-test"
