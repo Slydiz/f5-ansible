@@ -27,25 +27,3 @@
         partition: Common
         state: present
       delegate_to: localhost
-
-    - name: "Assigner {{ vs_name }} au Traffic Group {{ vs_traffic_group }}"
-      uri:
-        url: "https://{{ ansible_host }}/mgmt/tm/ltm/virtual/~Common~{{ vs_name }}"
-        method: PATCH
-        user: "{{ ansible_user }}"
-        password: "{{ ansible_password }}"
-        body:
-          trafficGroup: "/Common/{{ vs_traffic_group }}"
-        body_format: json
-        validate_certs: no
-        status_code: 200
-      delegate_to: localhost
-      when: vs_traffic_group is defined
-
-    - name: "Sauvegarder la configuration"
-      bigip_command:
-        provider: "{{ f5_provider }}"
-        commands:
-          - "save sys config"
-      delegate_to: localhost
-      when: vs_traffic_group is defined
