@@ -32,8 +32,8 @@
       bigip_command:
         provider: "{{ f5_provider }}"
         commands:
-          - "modify ltm virtual /Common/{{ vs_name }} traffic-group /Common/{{ vs_traffic_group }}"
-          - "save sys config"
+          - "tmsh modify ltm virtual /Common/{{ vs_name }} traffic-group /Common/{{ vs_traffic_group }}"
+          - "tmsh save sys config"
       delegate_to: localhost
       when: vs_traffic_group is defined
       register: tg_result
@@ -42,7 +42,7 @@
       bigip_command:
         provider: "{{ f5_provider }}"
         commands:
-          - "list ltm virtual /Common/{{ vs_name }} traffic-group"
+          - "tmsh list ltm virtual /Common/{{ vs_name }} traffic-group"
       delegate_to: localhost
       when: vs_traffic_group is defined
       register: tg_check
