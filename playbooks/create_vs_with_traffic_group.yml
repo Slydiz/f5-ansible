@@ -1,0 +1,53 @@
+---
+- name: Créer un Virtual Server avec Traffic Group personnalisé
+  hosts: f5
+  gather_facts: no
+  collections:
+    - f5networks.f5_modules
+
+  vars_files:
+    - ../group_vars/f5.yml
+
+  vars:
+    # Personnaliser ces paramètres
+    vs_name: "vs-test"
+    vs_destination: "10.69.238.220"
+    vs_port: 80
+    vs_traffic_group: "/Common/traffic-group-2"  # traffic-group-1 ou traffic-group-2
+    vs_pool: ""  # Optionnel : nom du pool à associer
+    vs_profiles:  # Optionnel : profils HTTP, TCP, etc.
+      - http
+      - tcp
+
+  tasks:
+    - name: "Créer le Virtual Server {{ vs_name }} sur {{ vs_traffic_group }}"
+      bigip_virtual_server:
+        provider: "{{ f5_provider }}"
+        name: "{{ vs_name }}"
+        destination: "{{ vs_destination }}"
+        port: "{{ vs_port }}"
+        traffic_group: "{{ vs_traffic_group }}"
+        description: "VS créé avec traffic group {{ vs_traffic_group }}"
+        snat: automap
+        partition: Common
+        profiles: "{{ vs_profiles | default(omit) }}"
+        pool: "{{ vs_pool if vs_pool else omit }}"
+        state: present
+      delegate_to: localhost
+      register: vs_result
+
+    - name: "Vérifier la configuration du VS"
+      bigip_command:
+        provider: "{{ f5_provider }}"
+        commands:
+          - "show ltm virtual {{ vs_name }}"
+      delegate_to: localhost
+      register: vs_status
+
+    - name: "Afficher le résultat"
+      debug:
+        msg:
+          - "Virtual Server '{{ vs_name }}' créé avec succès"
+          - "Destination: {{ vs_destination }}:{{ vs_port }}"
+          - "Traffic Group: {{ vs_traffic_group }}"
+          - "Status: {{ vs_result.changed | ternary('Créé', 'Déjà existant') }}"
