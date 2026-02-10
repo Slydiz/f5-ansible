@@ -47,12 +47,3 @@
           - tcp
         state: present
       delegate_to: localhost
-
-    - name: "Afficher le résumé"
-      debug:
-        msg:
-          - "=== Virtual Server créé avec succès ==="
-          - "Nom: {{ vs_name }}"
-          - "Destination: {{ vs_destination }}:{{ vs_port }}"
-          - "Pool: {{ vs_pool if vs_pool != '' else 'Aucun' }}"
-          - "Description: {{ vs_description if vs_description != '' else 'Aucune' }}"

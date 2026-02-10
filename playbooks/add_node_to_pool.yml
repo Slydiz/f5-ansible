@@ -36,10 +36,3 @@
         port: "{{ node_port }}"
         state: present
       delegate_to: localhost
-
-    - name: "Afficher le résumé"
-      debug:
-        msg:
-          - "=== Node ajouté au Pool avec succès ==="
-          - "Pool: {{ pool_name }}"
-          - "Node: {{ node_name }} ({{ node_ip }}:{{ node_port }})"

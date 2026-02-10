@@ -31,11 +31,3 @@
         description: "{{ node_description if node_description != '' else omit }}"
         state: present
       delegate_to: localhost
-
-    - name: "Afficher le résumé"
-      debug:
-        msg:
-          - "=== Node créé avec succès ==="
-          - "Nom: {{ node_name }}"
-          - "IP: {{ node_ip }}"
-          - "Description: {{ node_description if node_description != '' else 'Aucune' }}"
