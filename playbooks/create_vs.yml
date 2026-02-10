@@ -13,7 +13,7 @@
     vs_name: "vs-test"
     vs_destination: "10.69.238.220"
     vs_port: 80
-    vs_traffic_group: "traffic-group-1"  # ou traffic-group-2 (sans /Common/)
+    vs_traffic_group: "traffic-group-2"  # ou traffic-group-2 (sans /Common/)
 
   tasks:
     - name: "Créer VS {{ vs_name }}"
@@ -33,5 +33,21 @@
         provider: "{{ f5_provider }}"
         commands:
           - "modify ltm virtual /Common/{{ vs_name }} traffic-group /Common/{{ vs_traffic_group }}"
+          - "save sys config"
       delegate_to: localhost
+      when: vs_traffic_group is defined
+      register: tg_result
+
+    - name: "Vérifier l'assignation au Traffic Group"
+      bigip_command:
+        provider: "{{ f5_provider }}"
+        commands:
+          - "list ltm virtual /Common/{{ vs_name }} traffic-group"
+      delegate_to: localhost
+      when: vs_traffic_group is defined
+      register: tg_check
+
+    - name: "Afficher le Traffic Group actuel"
+      debug:
+        msg: "{{ tg_check.stdout_lines }}"
       when: vs_traffic_group is defined
