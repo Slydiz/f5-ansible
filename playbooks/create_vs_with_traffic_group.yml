@@ -20,13 +20,12 @@
       - tcp
 
   tasks:
-    - name: "Créer le Virtual Server {{ vs_name }} sur {{ vs_traffic_group }}"
+    - name: "Créer le Virtual Server {{ vs_name }}"
       bigip_virtual_server:
         provider: "{{ f5_provider }}"
         name: "{{ vs_name }}"
         destination: "{{ vs_destination }}"
         port: "{{ vs_port }}"
-        traffic_group: "{{ vs_traffic_group }}"
         description: "VS créé avec traffic group {{ vs_traffic_group }}"
         snat: automap
         partition: Common
@@ -35,6 +34,14 @@
         state: present
       delegate_to: localhost
       register: vs_result
+
+    - name: "Assigner le VS au Traffic Group {{ vs_traffic_group }}"
+      bigip_command:
+        provider: "{{ f5_provider }}"
+        commands:
+          - "modify ltm virtual /Common/{{ vs_name }} traffic-group {{ vs_traffic_group }}"
+      delegate_to: localhost
+      when: vs_traffic_group is defined and vs_traffic_group != ""
 
     - name: "Vérifier la configuration du VS"
       bigip_command:
