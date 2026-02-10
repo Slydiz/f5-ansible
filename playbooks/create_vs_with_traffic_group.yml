@@ -35,6 +35,10 @@
       delegate_to: localhost
       register: vs_result
 
+    - name: "Attendre que le VS soit complètement créé"
+      pause:
+        seconds: 2
+
     - name: "Assigner le VS au Traffic Group {{ vs_traffic_group }}"
       bigip_command:
         provider: "{{ f5_provider }}"
@@ -42,12 +46,20 @@
           - "modify ltm virtual /Common/{{ vs_name }} traffic-group {{ vs_traffic_group }}"
       delegate_to: localhost
       when: vs_traffic_group is defined and vs_traffic_group != ""
+      register: tg_assignment
 
-    - name: "Vérifier la configuration du VS"
+    - name: "Sauvegarder la configuration"
       bigip_command:
         provider: "{{ f5_provider }}"
         commands:
-          - "show ltm virtual {{ vs_name }}"
+          - "save sys config"
+      delegate_to: localhost
+
+    - name: "Vérifier la configuration finale du VS"
+      bigip_command:
+        provider: "{{ f5_provider }}"
+        commands:
+          - "list ltm virtual {{ vs_name }} traffic-group"
       delegate_to: localhost
       register: vs_status
 
@@ -56,5 +68,6 @@
         msg:
           - "Virtual Server '{{ vs_name }}' créé avec succès"
           - "Destination: {{ vs_destination }}:{{ vs_port }}"
-          - "Traffic Group: {{ vs_traffic_group }}"
-          - "Status: {{ vs_result.changed | ternary('Créé', 'Déjà existant') }}"
+          - "Traffic Group demandé: {{ vs_traffic_group }}"
+          - "Configuration actuelle:"
+          - "{{ vs_status.stdout_lines }}"
