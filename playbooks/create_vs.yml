@@ -29,25 +29,23 @@
       delegate_to: localhost
 
     - name: "Assigner {{ vs_name }} au Traffic Group {{ vs_traffic_group }}"
+      uri:
+        url: "https://{{ ansible_host }}/mgmt/tm/ltm/virtual/~Common~{{ vs_name }}"
+        method: PATCH
+        user: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        body:
+          trafficGroup: "/Common/{{ vs_traffic_group }}"
+        body_format: json
+        validate_certs: no
+        status_code: 200
+      delegate_to: localhost
+      when: vs_traffic_group is defined
+
+    - name: "Sauvegarder la configuration"
       bigip_command:
         provider: "{{ f5_provider }}"
         commands:
-          - "tmsh modify ltm virtual /Common/{{ vs_name }} traffic-group /Common/{{ vs_traffic_group }}"
-          - "tmsh save sys config"
+          - "save sys config"
       delegate_to: localhost
-      when: vs_traffic_group is defined
-      register: tg_result
-
-    - name: "Vérifier l'assignation au Traffic Group"
-      bigip_command:
-        provider: "{{ f5_provider }}"
-        commands:
-          - "tmsh list ltm virtual /Common/{{ vs_name }} traffic-group"
-      delegate_to: localhost
-      when: vs_traffic_group is defined
-      register: tg_check
-
-    - name: "Afficher le Traffic Group actuel"
-      debug:
-        msg: "{{ tg_check.stdout_lines }}"
       when: vs_traffic_group is defined
