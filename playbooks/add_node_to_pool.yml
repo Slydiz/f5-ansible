@@ -1,0 +1,45 @@
+---
+- name: Ajouter un Node à un Pool
+  hosts: f5
+  gather_facts: no
+  collections:
+    - f5networks.f5_modules
+
+  vars_files:
+    - ../group_vars/f5.yml
+
+  vars_prompt:
+    - name: pool_name
+      prompt: "Nom du Pool"
+      private: no
+
+    - name: node_name
+      prompt: "Nom du Node"
+      private: no
+
+    - name: node_ip
+      prompt: "IP du Node"
+      private: no
+
+    - name: node_port
+      prompt: "Port du Node"
+      private: no
+      default: "80"
+
+  tasks:
+    - name: "Ajouter {{ node_name }} au Pool {{ pool_name }}"
+      bigip_pool_member:
+        provider: "{{ f5_provider }}"
+        pool: "{{ pool_name }}"
+        name: "{{ node_name }}"
+        host: "{{ node_ip }}"
+        port: "{{ node_port }}"
+        state: present
+      delegate_to: localhost
+
+    - name: "Afficher le résumé"
+      debug:
+        msg:
+          - "=== Node ajouté au Pool avec succès ==="
+          - "Pool: {{ pool_name }}"
+          - "Node: {{ node_name }} ({{ node_ip }}:{{ node_port }})"

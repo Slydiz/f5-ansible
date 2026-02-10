@@ -1,5 +1,5 @@
 ---
-- name: VS
+- name: Créer un Virtual Server
   hosts: f5
   gather_facts: no
   collections:
@@ -8,22 +8,51 @@
   vars_files:
     - ../group_vars/f5.yml
 
-  vars:
-    # Personnaliser selon vos besoins
-    vs_name: "vs-test"
-    vs_destination: "10.69.238.220"
-    vs_port: 80
-    vs_traffic_group: "traffic-group-2"  # ou traffic-group-2 (sans /Common/)
+  vars_prompt:
+    - name: vs_name
+      prompt: "Nom du Virtual Server"
+      private: no
+
+    - name: vs_destination
+      prompt: "Adresse IP du Virtual Server"
+      private: no
+
+    - name: vs_port
+      prompt: "Port du Virtual Server"
+      private: no
+      default: "80"
+
+    - name: vs_pool
+      prompt: "Nom du Pool à associer (laisser vide si aucun)"
+      private: no
+      default: ""
+
+    - name: vs_description
+      prompt: "Description du Virtual Server (optionnel)"
+      private: no
+      default: ""
 
   tasks:
-    - name: "Créer VS {{ vs_name }}"
+    - name: "Créer le Virtual Server {{ vs_name }}"
       bigip_virtual_server:
         provider: "{{ f5_provider }}"
         name: "{{ vs_name }}"
         destination: "{{ vs_destination }}"
         port: "{{ vs_port }}"
-        description: "VS on {{ vs_traffic_group }}"
+        pool: "{{ vs_pool if vs_pool != '' else omit }}"
+        description: "{{ vs_description if vs_description != '' else omit }}"
         snat: automap
-        partition: Common
+        profiles:
+          - http
+          - tcp
         state: present
       delegate_to: localhost
+
+    - name: "Afficher le résumé"
+      debug:
+        msg:
+          - "=== Virtual Server créé avec succès ==="
+          - "Nom: {{ vs_name }}"
+          - "Destination: {{ vs_destination }}:{{ vs_port }}"
+          - "Pool: {{ vs_pool if vs_pool != '' else 'Aucun' }}"
+          - "Description: {{ vs_description if vs_description != '' else 'Aucune' }}"

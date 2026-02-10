@@ -1,0 +1,50 @@
+---
+- name: Créer un Pool
+  hosts: f5
+  gather_facts: no
+  collections:
+    - f5networks.f5_modules
+
+  vars_files:
+    - ../group_vars/f5.yml
+
+  vars_prompt:
+    - name: pool_name
+      prompt: "Nom du Pool"
+      private: no
+
+    - name: pool_lb_method
+      prompt: "Méthode de load balancing (round-robin, least-connections-member, etc.)"
+      private: no
+      default: "round-robin"
+
+    - name: pool_monitor
+      prompt: "Monitor du Pool (http, https, tcp, icmp)"
+      private: no
+      default: "http"
+
+    - name: pool_description
+      prompt: "Description du Pool (optionnel)"
+      private: no
+      default: ""
+
+  tasks:
+    - name: "Créer le Pool {{ pool_name }}"
+      bigip_pool:
+        provider: "{{ f5_provider }}"
+        name: "{{ pool_name }}"
+        lb_method: "{{ pool_lb_method }}"
+        monitors:
+          - "/Common/{{ pool_monitor }}"
+        description: "{{ pool_description if pool_description != '' else omit }}"
+        state: present
+      delegate_to: localhost
+
+    - name: "Afficher le résumé"
+      debug:
+        msg:
+          - "=== Pool créé avec succès ==="
+          - "Nom: {{ pool_name }}"
+          - "Load Balancing: {{ pool_lb_method }}"
+          - "Monitor: {{ pool_monitor }}"
+          - "Description: {{ pool_description if pool_description != '' else 'Aucune' }}"

@@ -1,0 +1,41 @@
+---
+- name: Créer un Node
+  hosts: f5
+  gather_facts: no
+  collections:
+    - f5networks.f5_modules
+
+  vars_files:
+    - ../group_vars/f5.yml
+
+  vars_prompt:
+    - name: node_name
+      prompt: "Nom du Node"
+      private: no
+
+    - name: node_ip
+      prompt: "Adresse IP du Node"
+      private: no
+
+    - name: node_description
+      prompt: "Description du Node (optionnel)"
+      private: no
+      default: ""
+
+  tasks:
+    - name: "Créer le Node {{ node_name }}"
+      bigip_node:
+        provider: "{{ f5_provider }}"
+        name: "{{ node_name }}"
+        host: "{{ node_ip }}"
+        description: "{{ node_description if node_description != '' else omit }}"
+        state: present
+      delegate_to: localhost
+
+    - name: "Afficher le résumé"
+      debug:
+        msg:
+          - "=== Node créé avec succès ==="
+          - "Nom: {{ node_name }}"
+          - "IP: {{ node_ip }}"
+          - "Description: {{ node_description if node_description != '' else 'Aucune' }}"
