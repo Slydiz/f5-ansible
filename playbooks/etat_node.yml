@@ -1,0 +1,27 @@
+---
+- name: etat d'un node
+  hosts: f5
+  gather_facts: no
+  collections:
+    - f5networks.f5_modules
+
+  vars_files:
+    - ../group_vars/f5.yml
+
+  vars_prompt:
+    - name: node_name
+      prompt: "Nom du Node"
+      private: no
+
+    - name: node_state
+      prompt: "Action (disabled, enabled, forced_offline)"
+      private: no
+      default: "disabled"
+
+  tasks:
+    - name: "Modifier l'état du Node {{ node_name }} vers {{ node_state }}"
+      bigip_node:
+        provider: "{{ f5_provider }}"
+        name: "{{ node_name }}"
+        state: "{{ node_state }}"
+      delegate_to: localhost
