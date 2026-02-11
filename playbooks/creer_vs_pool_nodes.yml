@@ -27,7 +27,7 @@
       private: no
 
     - name: pool_monitor
-      prompt: "Monitor du Pool (http, https, tcp, icmp)"
+      prompt: "Monitor du Pool"
       private: no
       default: "http"
 
@@ -122,7 +122,7 @@
         state: present
       delegate_to: localhost
 
-    - name: "Afficher le résumé de la configuration"
+    - name: "Résumé de la configuration"
       debug:
         msg:
           - "=== Configuration créée avec succès ==="
