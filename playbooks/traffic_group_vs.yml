@@ -1,5 +1,5 @@
 ---
-- name: Changer le Traffic Group d'un Virtual Server
+- name: Changer le Traffic Group d'une Virtual Address
   hosts: f5
   gather_facts: no
   collections:
@@ -9,54 +9,29 @@
     - ../group_vars/f5.yml
 
   vars_prompt:
-    - name: vs_name
-      prompt: "Nom du Virtual Server"
+    - name: virtual_address
+      prompt: "Adresse IP de la Virtual Address (ex: 10.69.238.111)"
       private: no
 
     - name: target_traffic_group
-      prompt: "Traffic Group cible (/Common/traffic-group-1 ou /Common/traffic-group-2)"
+      prompt: "Traffic Group cible (traffic-group-1 ou traffic-group-2)"
       private: no
 
   tasks:
-    - name: "Récupérer les informations du Virtual Server {{ vs_name }}"
+    - name: "Récupérer la configuration actuelle de {{ virtual_address }}"
       bigip_command:
         provider: "{{ f5_provider }}"
         commands:
-          - "list ltm virtual {{ vs_name }} destination traffic-group"
+          - "list ltm virtual-address {{ virtual_address }} traffic-group"
       delegate_to: localhost
-      register: vs_info
+      register: current_config
 
-    - name: "Afficher la configuration actuelle"
-      debug:
-        msg: "{{ vs_info.stdout_lines }}"
-
-    - name: "Changer le Traffic Group du Virtual Server vers {{ target_traffic_group }}"
+    - name: "Changer le Traffic Group de {{ virtual_address }} vers /Common/{{ target_traffic_group }}"
       bigip_command:
         provider: "{{ f5_provider }}"
         commands:
-          - "modify ltm virtual {{ vs_name }} traffic-group {{ target_traffic_group }}"
+          - "modify ltm virtual-address {{ virtual_address }} traffic-group /Common/{{ target_traffic_group }}"
       delegate_to: localhost
-
-    - name: "Récupérer l'adresse virtuelle du VS"
-      bigip_command:
-        provider: "{{ f5_provider }}"
-        commands:
-          - "list ltm virtual {{ vs_name }} destination"
-      delegate_to: localhost
-      register: vs_destination
-
-    - name: "Extraire l'IP de la destination"
-      set_fact:
-        virtual_address: "{{ vs_destination.stdout_lines[0] | regex_search('destination ([^:]+):', '\\1') | first }}"
-      when: vs_destination.stdout_lines | length > 0
-
-    - name: "Changer le Traffic Group de la Virtual Address {{ virtual_address }}"
-      bigip_command:
-        provider: "{{ f5_provider }}"
-        commands:
-          - "modify ltm virtual-address {{ virtual_address }} traffic-group {{ target_traffic_group }}"
-      delegate_to: localhost
-      when: virtual_address is defined
 
     - name: "Sauvegarder la configuration"
       bigip_command:
@@ -64,18 +39,3 @@
         commands:
           - "save sys config"
       delegate_to: localhost
-
-    - name: "Vérifier la nouvelle configuration"
-      bigip_command:
-        provider: "{{ f5_provider }}"
-        commands:
-          - "list ltm virtual {{ vs_name }} traffic-group"
-          - "list ltm virtual-address {{ virtual_address }} traffic-group"
-      delegate_to: localhost
-      register: new_config
-      when: virtual_address is defined
-
-    - name: "Afficher la nouvelle configuration"
-      debug:
-        msg: "{{ new_config.stdout_lines }}"
-      when: virtual_address is defined
