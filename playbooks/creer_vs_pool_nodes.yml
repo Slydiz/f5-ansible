@@ -44,6 +44,11 @@
       private: no
       default: "80"
 
+    - name: node_monitor
+      prompt: "Monitor pour les Nodes (icmp, tcp, tcp_half_open, laisser vide pour défaut)"
+      private: no
+      default: ""
+
     - name: node2_name
       prompt: "Nom du Node 2 (laisser vide si un seul node)"
       private: no
@@ -65,6 +70,7 @@
         provider: "{{ f5_provider }}"
         name: "{{ node1_name }}"
         host: "{{ node1_ip }}"
+        monitors: "{{ ['/Common/' + node_monitor] if node_monitor != '' else omit }}"
         state: present
       delegate_to: localhost
 
@@ -73,6 +79,7 @@
         provider: "{{ f5_provider }}"
         name: "{{ node2_name }}"
         host: "{{ node2_ip }}"
+        monitors: "{{ ['/Common/' + node_monitor] if node_monitor != '' else omit }}"
         state: present
       delegate_to: localhost
       when: node2_name != "" and node2_ip != ""

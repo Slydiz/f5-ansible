@@ -22,6 +22,11 @@
       private: no
       default: ""
 
+    - name: node_monitor
+      prompt: "Monitor du Node (icmp, tcp, tcp_half_open, laisser vide pour défaut)"
+      private: no
+      default: ""
+
   tasks:
     - name: "Créer le Node {{ node_name }}"
       bigip_node:
@@ -29,5 +34,6 @@
         name: "{{ node_name }}"
         host: "{{ node_ip }}"
         description: "{{ node_description if node_description != '' else omit }}"
+        monitors: "{{ ['/Common/' + node_monitor] if node_monitor != '' else omit }}"
         state: present
       delegate_to: localhost
