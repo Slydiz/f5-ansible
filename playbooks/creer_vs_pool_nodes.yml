@@ -121,12 +121,3 @@
           - tcp
         state: present
       delegate_to: localhost
-
-    - name: "Résumé de la configuration"
-      debug:
-        msg:
-          - "=== Configuration créée avec succès ==="
-          - "Virtual Server: {{ vs_name }} ({{ vs_destination }}:{{ vs_port }})"
-          - "Pool: {{ pool_name }} (monitor: {{ pool_monitor }})"
-          - "Node 1: {{ node1_name }} ({{ node1_ip }}:{{ node1_port }})"
-          - "Node 2: {{ node2_name | default('Non configuré') }} {{ '(' + node2_ip + ':' + node2_port + ')' if node2_ip != '' else '' }}"
